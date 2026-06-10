@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a0a2e"/>
+      <stop offset="100%" style="stop-color:#0a0a0a"/>
+    </linearGradient>
+    <linearGradient id="ring1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff6699"/>
+      <stop offset="100%" style="stop-color:#ff3366"/>
+    </linearGradient>
+    <linearGradient id="ring2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#b34dff"/>
+      <stop offset="100%" style="stop-color:#8833cc"/>
+    </linearGradient>
+    <linearGradient id="ring3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4d80ff"/>
+      <stop offset="100%" style="stop-color:#3355cc"/>
+    </linearGradient>
+    <linearGradient id="ring4" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff8c33"/>
+      <stop offset="100%" style="stop-color:#ff6600"/>
+    </linearGradient>
+    <linearGradient id="titleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ff6699"/>
+      <stop offset="40%" style="stop-color:#b34dff"/>
+      <stop offset="100%" style="stop-color:#4d80ff"/>
+    </linearGradient>
+    <linearGradient id="glowGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffd700"/>
+      <stop offset="100%" style="stop-color:#ffaa00"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="80" fill="url(#bg)"/>
+
+  <!-- Outer glow ring -->
+  <circle cx="256" cy="230" r="175" fill="none" stroke="#ff669920" stroke-width="40" filter="url(#softGlow)"/>
+
+  <!-- Ring 4 (outermost) - Orange -->
+  <circle cx="256" cy="230" r="170" fill="none" stroke="url(#ring4)" stroke-width="3" opacity="0.7"/>
+  <circle cx="256" cy="230" r="170" fill="none" stroke="#ff8c33" stroke-width="8" opacity="0.15"/>
+  <!-- Segments on ring 4 -->
+  <circle cx="256" cy="60" r="8" fill="#ff8c33" filter="url(#glow)"/>
+  <circle cx="386" cy="145" r="7" fill="#ff8c3380"/>
+  <circle cx="415" cy="275" r="7" fill="#ff8c3380"/>
+  <circle cx="320" cy="385" r="7" fill="#ff8c3380"/>
+  <circle cx="192" cy="385" r="7" fill="#ff8c3380"/>
+  <circle cx="97" cy="275" r="7" fill="#ff8c3380"/>
+  <circle cx="126" cy="145" r="7" fill="#ff8c3380"/>
+
+  <!-- Ring 3 - Blue -->
+  <circle cx="256" cy="230" r="125" fill="none" stroke="url(#ring3)" stroke-width="3" opacity="0.7"/>
+  <circle cx="256" cy="230" r="125" fill="none" stroke="#4d80ff" stroke-width="8" opacity="0.15"/>
+  <!-- Segments on ring 3 -->
+  <circle cx="256" cy="105" r="7" fill="#4d80ff" filter="url(#glow)"/>
+  <circle cx="364" cy="167" r="6" fill="#4d80ff80"/>
+  <circle cx="364" cy="293" r="6" fill="#4d80ff80"/>
+  <circle cx="256" cy="355" r="6" fill="#4d80ff80"/>
+  <circle cx="148" cy="293" r="6" fill="#4d80ff80"/>
+  <circle cx="148" cy="167" r="6" fill="#4d80ff80"/>
+
+  <!-- Ring 2 - Purple -->
+  <circle cx="256" cy="230" r="80" fill="none" stroke="url(#ring2)" stroke-width="3.5" opacity="0.8"/>
+  <circle cx="256" cy="230" r="80" fill="none" stroke="#b34dff" stroke-width="10" opacity="0.15"/>
+  <!-- Segments on ring 2 -->
+  <circle cx="256" cy="150" r="7" fill="#b34dff" filter="url(#glow)"/>
+  <circle cx="325" cy="190" r="6" fill="#b34dff80"/>
+  <circle cx="325" cy="270" r="6" fill="#b34dff80"/>
+  <circle cx="256" cy="310" r="6" fill="#b34dff80"/>
+  <circle cx="187" cy="270" r="6" fill="#b34dff80"/>
+  <circle cx="187" cy="190" r="6" fill="#b34dff80"/>
+
+  <!-- Ring 1 (innermost) - Pink (selected ring glow) -->
+  <circle cx="256" cy="230" r="40" fill="none" stroke="#ff669940" stroke-width="12" filter="url(#softGlow)"/>
+  <circle cx="256" cy="230" r="40" fill="none" stroke="url(#ring1)" stroke-width="3.5" opacity="0.9"/>
+  <!-- Segments on ring 1 -->
+  <circle cx="256" cy="190" r="7" fill="#ff6699" filter="url(#glow)"/>
+  <circle cx="290" cy="210" r="6" fill="#ff669980"/>
+  <circle cx="290" cy="250" r="6" fill="#ff669980"/>
+  <circle cx="256" cy="270" r="6" fill="#ff669980"/>
+  <circle cx="222" cy="250" r="6" fill="#ff669980"/>
+  <circle cx="222" cy="210" r="6" fill="#ff669980"/>
+
+  <!-- Center target indicator -->
+  <polygon points="256,218 264,230 256,242 248,230" fill="url(#glowGold)" filter="url(#glow)" opacity="0.8"/>
+
+  <!-- Alignment arrow at top -->
+  <polygon points="256,45 250,55 262,55" fill="#ffd700" opacity="0.6"/>
+
+  <!-- Title -->
+  <text x="256" y="440" text-anchor="middle" font-family="SF Pro Rounded, -apple-system, Helvetica Neue, Arial, sans-serif" font-weight="900" font-size="52" fill="url(#titleGrad)" letter-spacing="4">COGWIND</text>
+  <text x="256" y="470" text-anchor="middle" font-family="SF Pro Rounded, -apple-system, Helvetica Neue, Arial, sans-serif" font-weight="500" font-size="16" fill="#ffffff60" letter-spacing="2">CROWN ROTARY PUZZLE</text>
+</svg>

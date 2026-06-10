@@ -22,9 +22,10 @@ final class GameViewModel: ObservableObject {
     @Published var tutorialStep: Int = 0
 
     private var timer: AnyCancellable?
+    private var crownAccumulator: Double = 0
     private var lastCrownValue: Double = 0
     private let haptics = HapticEngine.shared
-    private let notchSize: Double = 1.0
+    private let crownStepThreshold: Double = 2.0
 
     init() {
         self.stats = StatsStore.load()
@@ -99,20 +100,23 @@ final class GameViewModel: ObservableObject {
 
         let delta = newValue - lastCrownValue
         lastCrownValue = newValue
+        crownAccumulator += delta
 
-        if delta > 0.3 {
+        while crownAccumulator >= crownStepThreshold {
+            crownAccumulator -= crownStepThreshold
             rings[selectedRingIndex].rotate(by: 1)
             moveCount += 1
             haptics.notch()
-            updateSolvedCount()
-            checkWin()
-        } else if delta < -0.3 {
+        }
+        while crownAccumulator <= -crownStepThreshold {
+            crownAccumulator += crownStepThreshold
             rings[selectedRingIndex].rotate(by: -1)
             moveCount += 1
             haptics.notch()
-            updateSolvedCount()
-            checkWin()
         }
+
+        updateSolvedCount()
+        checkWin()
     }
 
     // MARK: - Ring Selection
@@ -120,12 +124,14 @@ final class GameViewModel: ObservableObject {
     func selectNextRing() {
         guard !rings.isEmpty else { return }
         selectedRingIndex = (selectedRingIndex + 1) % rings.count
+        crownAccumulator = 0
         haptics.selectionTick()
     }
 
     func selectPreviousRing() {
         guard !rings.isEmpty else { return }
         selectedRingIndex = (selectedRingIndex - 1 + rings.count) % rings.count
+        crownAccumulator = 0
         haptics.selectionTick()
     }
 
