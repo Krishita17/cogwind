@@ -1,0 +1,16 @@
+{
+  "images" : [
+    {
+      "idiom" : "watch",
+      "platform" : "watchOS",
+      "role" : "appLauncher",
+      "scale" : "2x",
+      "size" : "1024x1024",
+      "subtype" : "watchOS"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
