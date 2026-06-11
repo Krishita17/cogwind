@@ -8,6 +8,7 @@ struct RingView: View {
     let targetGlyph: Segment.Glyph
     let showHint: Bool
     let hintDirection: Int
+    let proximity: Double
 
     private var radius: CGFloat {
         let maxRadius: CGFloat = 72
@@ -22,6 +23,20 @@ struct RingView: View {
 
     private var ringColor: Color {
         CogwindTheme.ringColor(for: ringIndex)
+    }
+
+    private var proximityColor: Color {
+        if ring.isSolved { return CogwindTheme.gold }
+        let clamped = max(0, min(1, proximity))
+        if clamped > 0.8 { return CogwindTheme.gold }
+        if clamped > 0.5 { return CogwindTheme.orange }
+        if clamped > 0.2 { return CogwindTheme.blue }
+        return CogwindTheme.deepPurple
+    }
+
+    private var proximityGlow: CGFloat {
+        let clamped = max(0, min(1, proximity))
+        return CGFloat(clamped) * 0.4
     }
 
     var body: some View {
@@ -44,6 +59,13 @@ struct RingView: View {
                 Circle()
                     .stroke(CogwindTheme.gold.opacity(0.4), lineWidth: 2)
                     .frame(width: radius * 2, height: radius * 2)
+            }
+
+            if !ring.isSolved && proximity > 0.3 {
+                Circle()
+                    .stroke(proximityColor.opacity(proximityGlow), lineWidth: 3)
+                    .frame(width: radius * 2, height: radius * 2)
+                    .blur(radius: 4)
             }
 
             ForEach(Array(ring.displaySegments.enumerated()), id: \.offset) { index, segment in

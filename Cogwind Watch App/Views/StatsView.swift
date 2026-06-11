@@ -13,9 +13,13 @@ struct StatsView: View {
                 statCard("Highest Level", "\(stats.highestLevel)", CogwindTheme.pink)
                 statCard("Total Solves", "\(stats.totalSolves)", CogwindTheme.purple)
                 statCard("Best Streak", "\(stats.bestStreak)", CogwindTheme.orange)
+                statCard("Total Stars", "\(stats.totalStars)/90", CogwindTheme.gold)
                 statCard("Perfect Solves", "\(stats.perfectSolves)", CogwindTheme.gold)
                 statCard("Speed Solves", "\(stats.fastSolves)", CogwindTheme.blue)
+                statCard("Daily Wins", "\(stats.dailyChallengesCompleted)", CogwindTheme.deepPurple)
+                statCard("Best Combo", "\(stats.maxCombo)x", CogwindTheme.hotPink)
                 statCard("Hints Left", "\(stats.hintsRemaining)", CogwindTheme.gold)
+                statCard("Difficulty", stats.difficulty.rawValue, CogwindTheme.orange)
                 statCard("Total Play", formatTime(stats.totalPlayTime), CogwindTheme.softBlue)
                 statCard("Achievements", "\(stats.achievements.count)/\(Achievement.allCases.count)", CogwindTheme.gold)
 
@@ -31,6 +35,17 @@ struct StatsView: View {
                             Text("Level \(level)")
                                 .font(.system(size: 10))
                                 .foregroundStyle(.white.opacity(0.5))
+
+                            if let starCount = stats.starRatings[level], starCount > 0 {
+                                HStack(spacing: 0) {
+                                    ForEach(0..<starCount, id: \.self) { _ in
+                                        Image(systemName: "star.fill")
+                                            .font(.system(size: 5))
+                                            .foregroundStyle(CogwindTheme.gold)
+                                    }
+                                }
+                            }
+
                             Spacer()
                             if let time = stats.bestTimes[level] {
                                 Text(String(format: "%.1fs", time))

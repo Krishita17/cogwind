@@ -24,11 +24,23 @@ struct GameView: View {
     private var headerBar: some View {
         HStack {
             if let level = viewModel.currentLevel {
-                Text("L\(level.id)")
-                    .font(.system(size: 11, weight: .bold, design: .rounded))
-                    .foregroundStyle(CogwindTheme.pink)
+                if viewModel.isDailyChallenge {
+                    Text("Daily")
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .foregroundStyle(CogwindTheme.gold)
+                } else {
+                    Text("L\(level.id)")
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .foregroundStyle(CogwindTheme.pink)
+                }
 
                 Spacer()
+
+                if viewModel.comboMultiplier > 1 {
+                    Text("\(viewModel.comboMultiplier)x")
+                        .font(.system(size: 10, weight: .black, design: .rounded))
+                        .foregroundStyle(CogwindTheme.orange)
+                }
 
                 if level.timeLimit != nil {
                     HStack(spacing: 2) {
@@ -57,7 +69,6 @@ struct GameView: View {
 
     private var puzzleArea: some View {
         ZStack {
-            // Solved ring count indicator
             if viewModel.rings.count > 1 {
                 VStack {
                     Spacer()
@@ -79,11 +90,16 @@ struct GameView: View {
                     isSelected: index == viewModel.selectedRingIndex,
                     targetGlyph: viewModel.currentLevel?.targetGlyph ?? .circle,
                     showHint: viewModel.showHint && viewModel.hintRingIndex == index,
-                    hintDirection: ring.hintDirection
+                    hintDirection: ring.hintDirection,
+                    proximity: index < viewModel.proximityValues.count ? viewModel.proximityValues[index] : 0
                 )
             }
 
             centerIndicator
+
+            if viewModel.comboTimeRemaining > 0 {
+                comboIndicator
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .focusable()
@@ -109,14 +125,39 @@ struct GameView: View {
         }
     }
 
+    private var comboIndicator: some View {
+        VStack {
+            HStack(spacing: 2) {
+                Image(systemName: "hurricane")
+                    .font(.system(size: 7))
+                Text("\(viewModel.comboMultiplier)x COMBO")
+                    .font(.system(size: 7, weight: .black, design: .rounded))
+            }
+            .foregroundStyle(CogwindTheme.orange)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(Capsule().fill(CogwindTheme.orange.opacity(0.15)))
+
+            Spacer()
+        }
+    }
+
     private var bottomBar: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 6) {
             Button(action: viewModel.selectPreviousRing) {
                 Image(systemName: "chevron.left.circle.fill")
                     .font(.system(size: 20))
                     .foregroundStyle(CogwindTheme.purple)
             }
             .buttonStyle(.plain)
+
+            Button(action: viewModel.undo) {
+                Image(systemName: "arrow.uturn.backward.circle.fill")
+                    .font(.system(size: 14))
+                    .foregroundStyle(viewModel.canUndo ? CogwindTheme.blue : .gray.opacity(0.3))
+            }
+            .buttonStyle(.plain)
+            .disabled(!viewModel.canUndo)
 
             Button(action: viewModel.useHint) {
                 HStack(spacing: 2) {

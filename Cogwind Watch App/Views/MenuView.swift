@@ -8,7 +8,9 @@ struct MenuView: View {
         ScrollView {
             VStack(spacing: 10) {
                 titleSection
+                dailyChallengeButton
                 playButton
+                difficultyPicker
                 levelGrid
                 bottomButtons
             }
@@ -42,6 +44,31 @@ struct MenuView: View {
         }
     }
 
+    private var dailyChallengeButton: some View {
+        Button(action: { viewModel.startDailyChallenge() }) {
+            HStack(spacing: 4) {
+                Image(systemName: "calendar.badge.clock")
+                    .font(.system(size: 12))
+                Text("Daily Challenge")
+                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                if viewModel.stats.lastDailyChallengeDate == todayString() {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 9))
+                        .foregroundStyle(CogwindTheme.gold)
+                }
+            }
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 6)
+            .background(
+                LinearGradient(colors: [CogwindTheme.purple, CogwindTheme.deepPurple], startPoint: .leading, endPoint: .trailing)
+            )
+            .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 8)
+    }
+
     private var playButton: some View {
         Button(action: {
             if !viewModel.stats.hasSeenTutorial {
@@ -70,6 +97,29 @@ struct MenuView: View {
         .padding(.horizontal, 8)
     }
 
+    private var difficultyPicker: some View {
+        HStack(spacing: 6) {
+            ForEach(DifficultyMode.allCases, id: \.rawValue) { mode in
+                Button(action: { viewModel.setDifficulty(mode) }) {
+                    VStack(spacing: 2) {
+                        Image(systemName: mode.icon)
+                            .font(.system(size: 10))
+                        Text(mode.rawValue)
+                            .font(.system(size: 7, weight: .bold, design: .rounded))
+                    }
+                    .foregroundStyle(viewModel.stats.difficulty == mode ? .white : .white.opacity(0.3))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(
+                        Capsule()
+                            .fill(viewModel.stats.difficulty == mode ? difficultyColor(mode).opacity(0.3) : Color.white.opacity(0.05))
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
     private var levelGrid: some View {
         VStack(spacing: 6) {
             ForEach(Level.World.allCases, id: \.rawValue) { world in
@@ -88,6 +138,7 @@ struct MenuView: View {
                                     level: level,
                                     isUnlocked: level.id <= viewModel.stats.highestLevel + 1,
                                     isCompleted: level.id <= viewModel.stats.highestLevel,
+                                    stars: viewModel.stats.starRatings[level.id] ?? 0,
                                     color: worldColor(world)
                                 ) {
                                     viewModel.startLevel(level)
@@ -147,12 +198,27 @@ struct MenuView: View {
         case .abyss: return CogwindTheme.hotPink
         }
     }
+
+    private func difficultyColor(_ mode: DifficultyMode) -> Color {
+        switch mode {
+        case .casual: return CogwindTheme.softBlue
+        case .normal: return CogwindTheme.orange
+        case .expert: return CogwindTheme.hotPink
+        }
+    }
+
+    private func todayString() -> String {
+        let df = DateFormatter()
+        df.dateFormat = "yyyy-MM-dd"
+        return df.string(from: Date())
+    }
 }
 
 struct LevelButton: View {
     let level: Level
     let isUnlocked: Bool
     let isCompleted: Bool
+    let stars: Int
     let color: Color
     let action: () -> Void
 
@@ -161,20 +227,32 @@ struct LevelButton: View {
             ZStack {
                 RoundedRectangle(cornerRadius: 6)
                     .fill(isCompleted ? color.opacity(0.3) : (isUnlocked ? color.opacity(0.15) : Color.gray.opacity(0.08)))
-                    .frame(height: 26)
+                    .frame(height: 30)
                     .overlay(
                         RoundedRectangle(cornerRadius: 6)
                             .stroke(isCompleted ? color.opacity(0.6) : Color.clear, lineWidth: 1)
                     )
 
-                if isUnlocked {
-                    Text("\(level.id)")
-                        .font(.system(size: 11, weight: .bold, design: .rounded))
-                        .foregroundStyle(isCompleted ? color : color.opacity(0.7))
-                } else {
-                    Image(systemName: "lock.fill")
-                        .font(.system(size: 7))
-                        .foregroundStyle(.gray.opacity(0.4))
+                VStack(spacing: 1) {
+                    if isUnlocked {
+                        Text("\(level.id)")
+                            .font(.system(size: 10, weight: .bold, design: .rounded))
+                            .foregroundStyle(isCompleted ? color : color.opacity(0.7))
+
+                        if isCompleted && stars > 0 {
+                            HStack(spacing: 0) {
+                                ForEach(0..<3, id: \.self) { i in
+                                    Image(systemName: i < stars ? "star.fill" : "star")
+                                        .font(.system(size: 4))
+                                        .foregroundStyle(i < stars ? CogwindTheme.gold : color.opacity(0.2))
+                                }
+                            }
+                        }
+                    } else {
+                        Image(systemName: "lock.fill")
+                            .font(.system(size: 7))
+                            .foregroundStyle(.gray.opacity(0.4))
+                    }
                 }
             }
         }

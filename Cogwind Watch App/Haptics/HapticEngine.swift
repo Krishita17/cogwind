@@ -48,4 +48,20 @@ final class HapticEngine {
     func hintPulse() {
         device.play(.start)
     }
+
+    func combo() {
+        Task {
+            device.play(.directionUp)
+            try? await Task.sleep(nanoseconds: 100_000_000)
+            device.play(.click)
+        }
+    }
+
+    func undo() {
+        device.play(.directionDown)
+    }
+
+    func proximityWarm() {
+        device.play(.stop)
+    }
 }

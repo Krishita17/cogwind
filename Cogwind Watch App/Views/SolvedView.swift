@@ -28,6 +28,8 @@ struct SolvedView: View {
                     .font(.system(size: 15, weight: .black, design: .rounded))
                     .foregroundStyle(CogwindTheme.solvedGradient)
 
+                starRatingView
+
                 VStack(spacing: 3) {
                     scoreRow("Score", "\(viewModel.score)", CogwindTheme.gold)
                     scoreRow("Moves", "\(viewModel.moveCount)", CogwindTheme.blue)
@@ -35,19 +37,30 @@ struct SolvedView: View {
                     if viewModel.stats.currentStreak > 1 {
                         scoreRow("Streak", "\(viewModel.stats.currentStreak)x", CogwindTheme.orange)
                     }
+                    if viewModel.comboMultiplier > 1 {
+                        scoreRow("Combo", "\(viewModel.comboMultiplier)x", CogwindTheme.hotPink)
+                    }
+                }
+
+                if viewModel.isDailyChallenge {
+                    Text("Daily Best: \(viewModel.stats.dailyChallengeBestScore)")
+                        .font(.system(size: 9, weight: .bold, design: .monospaced))
+                        .foregroundStyle(CogwindTheme.gold.opacity(0.6))
                 }
 
                 HStack(spacing: 16) {
-                    Button(action: viewModel.nextLevel) {
-                        VStack(spacing: 2) {
-                            Image(systemName: "forward.fill")
-                                .font(.system(size: 18))
-                            Text("Next")
-                                .font(.system(size: 8, weight: .medium))
+                    if !viewModel.isDailyChallenge {
+                        Button(action: viewModel.nextLevel) {
+                            VStack(spacing: 2) {
+                                Image(systemName: "forward.fill")
+                                    .font(.system(size: 18))
+                                Text("Next")
+                                    .font(.system(size: 8, weight: .medium))
+                            }
+                            .foregroundStyle(CogwindTheme.pink)
                         }
-                        .foregroundStyle(CogwindTheme.pink)
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
 
                     Button(action: viewModel.retryLevel) {
                         VStack(spacing: 2) {
@@ -78,6 +91,22 @@ struct SolvedView: View {
         .onAppear {
             showConfetti = true
             starPulse = true
+        }
+    }
+
+    private var starRatingView: some View {
+        HStack(spacing: 4) {
+            ForEach(1...3, id: \.self) { i in
+                Image(systemName: i <= viewModel.starRating ? "star.fill" : "star")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(i <= viewModel.starRating ? CogwindTheme.gold : .gray.opacity(0.3))
+                    .scaleEffect(showConfetti && i <= viewModel.starRating ? 1.0 : 0.5)
+                    .animation(
+                        .spring(response: 0.4, dampingFraction: 0.5)
+                            .delay(Double(i) * 0.2),
+                        value: showConfetti
+                    )
+            }
         }
     }
 

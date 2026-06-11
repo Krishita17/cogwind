@@ -13,7 +13,7 @@ struct ContentView: View {
                     MenuView(viewModel: viewModel)
                 case .tutorial:
                     TutorialView(viewModel: viewModel)
-                case .playing, .paused:
+                case .playing, .paused, .dailyChallenge:
                     GameView(viewModel: viewModel)
                 case .solved:
                     SolvedView(viewModel: viewModel)

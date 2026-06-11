@@ -7,6 +7,37 @@ enum GamePhase: Equatable {
     case paused
     case solved
     case timeUp
+    case dailyChallenge
+}
+
+enum DifficultyMode: String, Codable, CaseIterable {
+    case casual = "Casual"
+    case normal = "Normal"
+    case expert = "Expert"
+
+    var timeMultiplier: Double {
+        switch self {
+        case .casual: return 0
+        case .normal: return 1.0
+        case .expert: return 0.6
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .casual: return "leaf.fill"
+        case .normal: return "flame.fill"
+        case .expert: return "bolt.fill"
+        }
+    }
+
+    var scoreMultiplier: Double {
+        switch self {
+        case .casual: return 0.7
+        case .normal: return 1.0
+        case .expert: return 1.5
+        }
+    }
 }
 
 struct GameStats: Codable {
@@ -24,6 +55,15 @@ struct GameStats: Codable {
     var achievements: Set<String>
     var hasSeenTutorial: Bool
     var noHintStreak: Int
+    var difficulty: DifficultyMode
+    var starRatings: [Int: Int]
+    var totalStars: Int
+    var dailyChallengesCompleted: Int
+    var lastDailyChallengeDate: String?
+    var dailyChallengeBestScore: Int
+    var totalUndosUsed: Int
+    var maxCombo: Int
+    var noUndoStreak: Int
 
     static var empty: GameStats {
         GameStats(
@@ -40,7 +80,16 @@ struct GameStats: Codable {
             fastSolves: 0,
             achievements: [],
             hasSeenTutorial: false,
-            noHintStreak: 0
+            noHintStreak: 0,
+            difficulty: .normal,
+            starRatings: [:],
+            totalStars: 0,
+            dailyChallengesCompleted: 0,
+            lastDailyChallengeDate: nil,
+            dailyChallengeBestScore: 0,
+            totalUndosUsed: 0,
+            maxCombo: 0,
+            noUndoStreak: 0
         )
     }
 }
@@ -64,6 +113,12 @@ enum Achievement: String, CaseIterable, Identifiable {
     case hintMaster = "hint_master"
     case noHints = "no_hints"
     case marathoner = "marathoner"
+    case starCollector = "star_collector"
+    case threeStarPerfect = "three_star_perfect"
+    case dailyDevotee = "daily_devotee"
+    case comboKing = "combo_king"
+    case undoFree = "undo_free"
+    case allStars = "all_stars"
 
     var id: String { rawValue }
 
@@ -87,6 +142,12 @@ enum Achievement: String, CaseIterable, Identifiable {
         case .hintMaster: return "Hint Collector"
         case .noHints: return "No Help Needed"
         case .marathoner: return "Marathoner"
+        case .starCollector: return "Star Gatherer"
+        case .threeStarPerfect: return "Triple Star"
+        case .dailyDevotee: return "Daily Devotee"
+        case .comboKing: return "Combo King"
+        case .undoFree: return "No Regrets"
+        case .allStars: return "Stellar Master"
         }
     }
 
@@ -110,6 +171,12 @@ enum Achievement: String, CaseIterable, Identifiable {
         case .hintMaster: return "lightbulb.fill"
         case .noHints: return "brain.head.profile"
         case .marathoner: return "figure.run"
+        case .starCollector: return "star.leadinghalf.filled"
+        case .threeStarPerfect: return "star.square.on.square.fill"
+        case .dailyDevotee: return "calendar.badge.checkmark"
+        case .comboKing: return "hurricane"
+        case .undoFree: return "hand.thumbsup.fill"
+        case .allStars: return "seal.fill"
         }
     }
 
@@ -133,24 +200,71 @@ enum Achievement: String, CaseIterable, Identifiable {
         case .hintMaster: return "Accumulate 20 hints"
         case .noHints: return "Clear 10 levels without hints"
         case .marathoner: return "Play for 30 minutes total"
+        case .starCollector: return "Earn 30 total stars"
+        case .threeStarPerfect: return "Get 3 stars on any level"
+        case .dailyDevotee: return "Complete 7 daily challenges"
+        case .comboKing: return "Reach a 5x combo multiplier"
+        case .undoFree: return "Beat 5 levels without undo"
+        case .allStars: return "3-star all 30 levels"
         }
     }
 }
 
 final class StatsStore {
-    private static let key = "cogwind_stats_v2"
+    private static let key = "cogwind_stats_v3"
+    private static let legacyKey = "cogwind_stats_v2"
 
     static func load() -> GameStats {
-        guard let data = UserDefaults.standard.data(forKey: key),
-              let stats = try? JSONDecoder().decode(GameStats.self, from: data) else {
-            return .empty
+        if let data = UserDefaults.standard.data(forKey: key),
+           let stats = try? JSONDecoder().decode(GameStats.self, from: data) {
+            return stats
         }
-        return stats
+        if let data = UserDefaults.standard.data(forKey: legacyKey),
+           let old = try? JSONDecoder().decode(LegacyStats.self, from: data) {
+            return migrate(old)
+        }
+        return .empty
     }
 
     static func save(_ stats: GameStats) {
         if let data = try? JSONEncoder().encode(stats) {
             UserDefaults.standard.set(data, forKey: key)
         }
+    }
+
+    private struct LegacyStats: Codable {
+        var highestLevel: Int
+        var totalSolves: Int
+        var bestTimes: [Int: TimeInterval]
+        var bestScores: [Int: Int]
+        var totalPlayTime: TimeInterval
+        var currentStreak: Int
+        var bestStreak: Int
+        var hintsRemaining: Int
+        var totalHintsUsed: Int
+        var perfectSolves: Int
+        var fastSolves: Int
+        var achievements: Set<String>
+        var hasSeenTutorial: Bool
+        var noHintStreak: Int
+    }
+
+    private static func migrate(_ old: LegacyStats) -> GameStats {
+        var stats = GameStats.empty
+        stats.highestLevel = old.highestLevel
+        stats.totalSolves = old.totalSolves
+        stats.bestTimes = old.bestTimes
+        stats.bestScores = old.bestScores
+        stats.totalPlayTime = old.totalPlayTime
+        stats.currentStreak = old.currentStreak
+        stats.bestStreak = old.bestStreak
+        stats.hintsRemaining = old.hintsRemaining
+        stats.totalHintsUsed = old.totalHintsUsed
+        stats.perfectSolves = old.perfectSolves
+        stats.fastSolves = old.fastSolves
+        stats.achievements = old.achievements
+        stats.hasSeenTutorial = old.hasSeenTutorial
+        stats.noHintStreak = old.noHintStreak
+        return stats
     }
 }
